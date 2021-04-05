@@ -53,6 +53,7 @@ BATCH_SIZE = 64
 IMG_SHAPE = 128
 
 # %%
+# add a bunch of augmentantions to imagedatagenerator to help reduce overfitting
 img_gen = image.ImageDataGenerator(rescale=1.0 / 255)
 
 train_data_gen = img_gen.flow_from_directory(
@@ -87,7 +88,7 @@ model = tf.keras.models.Sequential(
         layers.Conv2D(64, 3, activation="relu"),
         layers.MaxPool2D(2, 2),
         layers.Conv2D(128, 3, activation="relu"),
-        layers.MaxPool2D(2, 2),
+        layers.MaxPool2D(2, 2), # include a drop out layer
         layers.Flatten(),
         layers.Dense(512, activation="relu"),
         layers.Dense(2),
@@ -117,25 +118,25 @@ history = model.fit(
 
 # %%
 # visualize results of the training
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
+acc = history.history["accuracy"]
+val_acc = history.history["val_accuracy"]
 
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+loss = history.history["loss"]
+val_loss = history.history["val_loss"]
 
 epochs_range = range(EPOCHS)
 
 plt.figure(figsize=(8, 8))
 plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
+plt.plot(epochs_range, acc, label="Training Accuracy")
+plt.plot(epochs_range, val_acc, label="Validation Accuracy")
+plt.legend(loc="lower right")
+plt.title("Training and Validation Accuracy")
 
 plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.savefig('foo.png')
+plt.plot(epochs_range, loss, label="Training Loss")
+plt.plot(epochs_range, val_loss, label="Validation Loss")
+plt.legend(loc="upper right")
+plt.title("Training and Validation Loss")
+plt.savefig("foo.png")
 plt.show()
