@@ -101,7 +101,7 @@ model.summary()
 # train the model
 
 model.compile(
-    optimizer='adam',
+    optimizer="adam",
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
     metrics=["accuracy"],
 )
@@ -133,3 +133,24 @@ plt.title("Training and Validation Loss")
 plt.show()
 
 # %%
+# check predictions
+class_names = np.array(info.features["label"].names)
+predicted_batch = model.predict(images)
+predicted_batch = tf.squeeze(predicted_batch).numpy()
+predicted_ids = np.argmax(predicted_batch, axis=-1)
+predicted_class_names = class_names[predicted_ids]
+
+print(predicted_class_names)
+# %%
+print("Labels: ", labels)
+print("Predicted labels: ", predicted_ids)
+#  some plots
+plt.figure(figsize=(10, 9))
+for n in range(8):
+    plt.subplots(6, 5, n + 1)
+    plt.subplots_adjust(hspace=0.3)
+    plt.imshow(images[n])
+    color = "blue" if predicted_ids[n] == labels else "red"
+    plt.title(predicted_class_names[n].title(), color=color)
+    plt.axis("off")
+    _ = plt.suptitle("Model predictions (blue: correct, red: incorrect)")
