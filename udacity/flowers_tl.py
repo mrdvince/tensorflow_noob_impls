@@ -44,3 +44,57 @@ train_batches = (
 )
 validation_batches = validation_set.map(format_image).batch(BATCH_SIZE).prefetch(1)
 # %%
+# feauture extractor (efficientnet)
+URL = "https://tfhub.dev/tensorflow/efficientnet/b0/feature-vector/1"
+feature_extractor = hub.KerasLayer(URL, input_shape=(IMG_RES, IMG_RES, 3))
+feature_extractor.trainable = False  # freeze
+#  attach to a classification head
+model = tf.keras.Sequential([feature_extractor, layers.Dense(num_classes)])
+model.summary()
+
+# %%
+# train model
+EPOCHS = 3
+model.compile(
+    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer="adam",
+    metrics=["accuracy"],
+)
+# %%
+history = model.fit(train_batches, epochs=EPOCHS, validation_data=validation_batches)
+
+# %%
+acc = history.history["accuracy"]
+val_acc = history.history["val_accuracy"]
+
+loss = history.history["loss"]
+val_loss = history.history["val_loss"]
+
+epochs_range = range(EPOCHS)
+
+# %%
+class_names = np.array(info.features["label"].names)
+class_names
+# %% make predictions on an image batch
+image_batch, label_batch = iter(validation_batches).next()
+
+predicted_batch = model.predict(image_batch)
+predicted_batch = tf.squeeze(predicted_batch).numpy()
+
+predicted_ids = np.argmax(predicted_batch, axis=-1)
+predicted_class_names = class_names[predicted_ids]
+
+# %%
+lc = lambda x: class_names[x]
+print(f"True labels: \n{lc(label_batch)}, \n\n Predcited labels: \n{lc(predicted_ids)}")
+# %% plot model preds
+fig = plt.figure(figsize=(25, 12))
+for idx in range(BATCH_SIZE):
+    ax = fig.add_subplot(4, BATCH_SIZE / 4, idx + 1, xticks=[], yticks=[])
+    plt.imshow(np.transpose(image_batch[idx], (0, 1, 2)))
+    color = "green" if predicted_ids[idx] == label_batch[idx] else "red"
+    ax.set_title(
+        f"{predicted_class_names[idx].title(), class_names[label_batch[idx]]}",
+        color=color,
+    )
+    plt.savefig("flowers_tl.png")
