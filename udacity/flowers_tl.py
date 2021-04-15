@@ -63,7 +63,7 @@ model.compile(
 # %%
 history = model.fit(train_batches, epochs=EPOCHS, validation_data=validation_batches)
 
-# %%
+# %% plot some metrics
 acc = history.history["accuracy"]
 val_acc = history.history["val_accuracy"]
 
@@ -72,6 +72,20 @@ val_loss = history.history["val_loss"]
 
 epochs_range = range(EPOCHS)
 
+plt.figure(figsize=(8,8))
+plt.subplot(1,2,1)
+plt.plot(epochs_range, acc, label="Training Accuracy")
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1,2,2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+
+plt.savefig('flowers_tl_loss.png')
 # %%
 class_names = np.array(info.features["label"].names)
 class_names
